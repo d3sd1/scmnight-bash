@@ -2,7 +2,7 @@
 
 _return=false;
 #Define command-level options
-_args=("--start" "--stop" "--restart");
+_args=("--start" "--stop" "--restart" "--deploy");
 _port=50001;
 
 #Start it
@@ -67,6 +67,14 @@ restartParam() {
         _print "TIP: Use scm-dev-web-disco --start to start the server." "cyan";
     fi
 
+}
+
+#Deploy it
+deployParam() {
+    _print "Start packing and doing stuff..." "blue" "white";
+    mkdir -p "/var/www/html/api.scmnight.com/projects/disco-panel-web/";
+    ng build --delete-output-path --build-optimizer --progress --verbose --aot --prod --env=prod --target=production --environment=prod --output-path="/var/www/html/api.scmnight.com/projects/disco-panel-web/";
+    _print "Proccess finished! Check details above." "blue" "white";
 }
 
 # GET SOURCES
