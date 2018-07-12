@@ -72,8 +72,8 @@ restartParam() {
 #Deploy it
 deployParam() {
     _print "Start packing and doing stuff..." "blue" "white";
-    mkdir -p "/var/www/html/api.scmnight.com/projects/disco-panel-web/";
-    ng build --delete-output-path --build-optimizer --progress --verbose --aot --prod --env=prod --target=production --environment=prod --output-path="/var/www/html/api.scmnight.com/projects/disco-panel-web/";
+    mkdir -p "/var/www/html/disco.scmnight.com/";
+    ng build --delete-output-path --build-optimizer --progress --verbose --aot --prod --env=prod --target=production --environment=prod --output-path="/var/www/html/disco.scmnight.com/";
     _print "Proccess finished! Check details above." "blue" "white";
 }
 
