@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Available colors
+_txt_black=`tput setaf 0`
+_txt_red=`tput setaf 1`
+_txt_green=`tput setaf 2`
+_txt_yellow=`tput setaf 3`
+_txt_blue=`tput setaf 4`
+_txt_magenta=`tput setaf 5`
+_txt_cyan=`tput setaf 6`
+_txt_white=`tput setaf 7`
+_txt_null=``
+_bg_black=`tput setab 0`
+_bg_red=`tput setab 1`
+_bg_green=`tput setab 2`
+_bg_yellow=`tput setab 3`
+_bg_blue=`tput setab 4`
+_bg_magenta=`tput setab 5`
+_bg_cyan=`tput setab 6`
+_bg_white=`tput setab 7`
+_bg_null=``
+reset=`tput sgr0`
+
+_print () {
+    if [ -z ${3+x} ]; then
+        _tmp_bg_color="_bg_null";
+    else
+        _tmp_bg_color="_bg_${3}";
+    fi;
+    if [ -z ${2+x} ]; then
+        _tmp_txt_color="_txt_null";
+    else
+        _tmp_txt_color="_txt_${2}";
+    fi;
+    echo "${!_tmp_txt_color}""${!_tmp_bg_color}""${1}${reset}";
+}
+
+bar=$(printf ",%s" "${_args[@]}")
+bar=${bar:1}
+
+bar="${bar//-}"
+OPTIONS=$(getopt -o hf:gb -l $bar -- "$@")
+
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+
+eval set -- $OPTIONS
+
+while true; do
+  case "$1" in
+
+    --)        shift ; break ;;
+    *) {
+        _found=false;
+        for _arg in "${_args[@]}"
+        do
+            if [ "$1" == "${_arg}" ]
+            then
+                _found=true;
+                _argFn="${_arg//-}Param";
+                type $_argFn &>/dev/null && ${_argFn} || _print "INVALID COMMAND CONFIGURATION: PLEASE ADD $_argFn METHOD." "black" "red" exit 1;
+            fi
+        done
+        if [ $_found != true ]
+        then
+            echo "unknown option: $1";
+            exit 1 ;
+        fi
+     }
+  esac
+  shift
+done
+
+if [ $# -ne 0 ]; then
+  echo "unknown option(s): $@"
+  exit 1
+fi

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# CHECK IF COMMAND IS CONFIGURED
+if [ -n "$_command" ]; then
+    _commandRunning="$(lsof -Pi :$_port -sTCP:LISTEN)";
+    # START SCM COMMAND. CAN IT RUN?
+    if [ $_needsCommandUp == false ] && [[ $_commandRunning ]]
+    then
+        _cantExecute;
+    elif [ $_needsCommandUp == true ] && ! [[ $_commandRunning ]]
+    then
+        _cantExecute;
+    else
+        _canExecute;
+    fi
+else
+   _print "INVALID COMMAND CONFIGURATION" "white" "red";
+fi;
