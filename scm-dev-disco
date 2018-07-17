@@ -1,0 +1,179 @@
+#!/bin/bash
+
+_return=false;
+#Define command-level options
+_args=("--start" "--stop" "--restart" "--deploy" "--ws_start" "--ws_stop" "--ws_restart" "--libs_update");
+_ng_port=50001;
+_ws_port=50002;
+
+
+#Start it
+startParam()
+{
+    usedPort=$_ng_port;
+    # NG SECTION. Configurable options
+    _command="ng serve --environment=dev --aot --host web.discoexample.dev.scmnight.com --port $usedPort";
+    _needsCommandUp=false;
+    _canExecute() {
+        _print "Starting server...";
+        mkdir -p /var/www/logs/scripts/;
+        touch /var/www/logs/scripts/web.discoexample.dev.scmnight.com.log;
+        cd /var/www/html/discoexample.dev.scmnight.com/web;
+        nohup $_command &>/var/www/logs/scripts/web.discoexample.dev.scmnight.com.log &
+        _print "Angular waked up!" "green";
+        _print "NOTE: Angular is still loading." "yellow";
+        _print "Log file: /var/www/logs/scripts/web.discoexample.dev.scmnight.com.log" "black" "green";
+        _return=true;
+    }
+    _cantExecute() {
+        _print "Angular for web.discoexample.dev.scmnight.com already running!" "white" "red";
+        _print "TIP: Use scm-dev-disco --stop to stop the server." "cyan";
+        _print "TIP: Use scm-dev-disco --restart to restart the server." "cyan";
+        _return=false;
+    }
+    # START SCM COMMAND
+    source scm-execute
+
+    # WS SECTION. Check if last action got success.
+    if [ "$_return" == "true" ]
+    then
+        ws_startParam;
+    fi
+}
+
+ws_startParam() {
+    usedPort=$_ws_port;
+    # WS SECTION. Configurable options
+    _command="php bin/console gos:websocket:server --port=$_ws_port";
+    _needsCommandUp=false;
+    _canExecute() {
+        _print "Starting server...";
+        /etc/init.d/stunnel4 start;
+        cd "/var/www/html/discoexample.dev.scmnight.com/rest";
+        nohup $_command &>/var/www/logs/scripts/ws.discoexample.dev.scmnight.com.log &
+        _print "Websockets waked up!" "green";
+        _print "NOTE: Websockets are still loading." "yellow";
+        _print "Log file: /var/www/logs/scripts/ws.discoexample.dev.scmnight.com.log" "black" "green";
+        _return=true;
+    }
+    _cantExecute() {
+        _print "Websockets for ws.discoexample.dev.scmnight.com already running!" "white" "red";
+        _print "TIP: Use scm-dev-disco --ws-stop to stop the websockets." "cyan";
+        _print "TIP: Use scm-dev-disco --ws-restart to restart the websockets." "cyan";
+        _return=false;
+    }
+    # START SCM COMMAND
+    source scm-execute
+}
+
+# Stop it
+ws_stopParam()
+{
+    usedPort=$_ws_port;
+    # Configurable options
+    _command="netstat -nlp | grep :$usedPort";
+    _needsCommandUp=true;
+    _canExecute() {
+        _print "Stopping websockets...";
+        /etc/init.d/stunnel4 stop;
+        _success="$(fuser -n tcp -k $usedPort)";
+        if [ $_success ]
+        then
+            _print "Websockets stopped!" "green";
+        else
+            _print "Websockets could not be stopped" "red";
+        fi
+        _return=true;
+    }
+    _cantExecute() {
+        _print "Websockets for ws.discoexample.dev.scmnight.com are not running!" "white" "red";
+        _print "TIP: Use scm-dev-disco --ws-start to start the server." "cyan";
+        _return=false;
+    }
+    # START SCM COMMAND
+    source scm-execute
+}
+
+# Stop it
+ws_restartParam()
+{
+    stopParam=$(ws_stopParam);
+    if [ "$_return" == "true" ]
+    then
+        _print "Doing restart proccess!" "blue" "white";
+        ws_startParam;
+    else
+        _print "Cannot restart ws.discoexample.dev.scmnight.com. It is not running." "red";
+        _print "TIP: Use scm-dev-disco --start to start the server." "cyan";
+    fi
+    # START SCM COMMAND
+    source scm-execute
+}
+
+# Stop it
+stopParam()
+{
+    usedPort=$_ng_port;
+    # Configurable options
+    _command="netstat -nlp | grep :$usedPort";
+    _needsCommandUp=true;
+    _canExecute() {
+        _print "Stopping server...";
+        _success="$(fuser -n tcp -k $usedPort)";
+        if [ $_success ]
+        then
+            _print "Server stopped!" "green";
+        else
+            _print "Server could not be stopped" "red";
+        fi
+        _return=true;
+    }
+    _cantExecute() {
+        _print "Angular for web.discoexample.dev.scmnight.com is not running!" "white" "red";
+        _print "TIP: Use scm-dev-disco --start to start the server." "cyan";
+        _return=false;
+    }
+    # START SCM COMMAND
+    source scm-execute
+
+    # WS SECTION. Check if last action got success.
+    if [ "$_return" == "true" ]
+    then
+        ws_stopParam;
+    fi
+}
+
+# Restart it
+restartParam() {
+    stopParam=$(stopParam);
+    if [ "$_return" == "true" ]
+    then
+        _print "Doing restart proccess!" "blue" "white";
+        startParam;
+    else
+        _print "Cannot restart web.discoexample.dev.scmnight.com. It is not running." "red";
+        _print "TIP: Use scm-dev-disco --start to start the server." "cyan";
+    fi
+}
+
+libs_updateParam() {
+    _print "Start updating and doing stuff..." "blue" "white";
+    cd "/var/www/html/discoexample.dev.scmnight.com/web";
+    npm i;
+    cd "/var/www/html/discoexample.dev.scmnight.com/rest";
+    composer dev-install;
+    _print "Proccess finished! Check details above." "blue" "white";
+}
+
+#Deploy it
+deployParam() {
+    _print "Start packing and doing stuff..." "blue" "white";
+    mkdir -p "/var/www/html/disco.scmnight.com";
+    cd "/var/www/html/discoexample.dev.scmnight.com/web";
+    rm -r /var/www/html/disco.scmnight.com/* 2> /dev/null;
+    ng build --delete-output-path=false --build-optimizer --progress --verbose --aot --prod --env=prod --target=production --environment=prod --output-path="/var/www/html/disco.scmnight.com/";
+    _print "Proccess finished! Check details above." "blue" "white";
+}
+
+# GET SOURCES
+source scm-core

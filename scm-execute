@@ -2,7 +2,7 @@
 
 # CHECK IF COMMAND IS CONFIGURED
 if [ -n "$_command" ]; then
-    _commandRunning="$(lsof -Pi :$_port -sTCP:LISTEN)";
+    _commandRunning="$(lsof -Pi :$usedPort -sTCP:LISTEN)";
     # START SCM COMMAND. CAN IT RUN?
     if [ $_needsCommandUp == false ] && [[ $_commandRunning ]]
     then
