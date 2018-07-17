@@ -97,8 +97,8 @@ ws_stopParam()
 # Stop it
 ws_restartParam()
 {
-    stopParam=$(ws_stopParam);
-    if [ "$_return" == "true" ]
+    ws_stopParam;
+    if [ "$_return" == true ]
     then
         _print "Doing restart proccess!" "blue" "white";
         ws_startParam;
@@ -145,7 +145,7 @@ stopParam()
 
 # Restart it
 restartParam() {
-    stopParam=$(stopParam);
+    stopParam;
     if [ "$_return" == "true" ]
     then
         _print "Doing restart proccess!" "blue" "white";
