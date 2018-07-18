@@ -12,7 +12,7 @@ startParam()
 {
     usedPort=$_ng_port;
     # NG SECTION. Configurable options
-    _command="ng serve --environment=dev --aot --host web.discoexample.dev.scmnight.com --port $usedPort";
+    _command="ng serve --configuration=dev --aot --host web.discoexample.dev.scmnight.com --port $usedPort";
     _needsCommandUp=false;
     _canExecute() {
         _print "Starting server...";
