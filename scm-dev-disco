@@ -149,13 +149,13 @@ stopParam()
 
 # Restart it
 restartParam() {
+        _print "Clearing api cache!" "blue" "white";
+        clear_api_cacheParam;
     stopParam;
     if [ "$_return" == "true" ]
     then
         _print "Doing restart proccess!" "blue" "white";
         startParam;
-        _print "Clearing api cache!" "blue" "white";
-        clear_api_cacheParam;
     else
         _print "Cannot restart web.discoexample.dev.scmnight.com. It is not running." "red";
         _print "TIP: Use scm-dev-disco --start to start the server." "cyan";
