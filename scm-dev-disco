@@ -2,11 +2,15 @@
 
 _return=false;
 #Define command-level options
-_args=("--start" "--stop" "--restart" "--deploy" "--ws_start" "--ws_stop" "--ws_restart" "--libs_update");
+_args=("--start" "--stop" "--restart" "--deploy" "--ws_start" "--ws_stop" "--ws_restart" "--libs_update" "--clear_api_cache");
 _ng_port=50001;
 _ws_port=50002;
 
-
+clear_api_cacheParam() {
+    cd /var/www/html/discoexample.dev.scmnight.com/rest;
+    php bin/console cache:clear;
+    chmod -R 777 /var/www/html/discoexample.dev.scmnight.com/rest;
+}
 #Start it
 startParam()
 {
@@ -100,6 +104,8 @@ ws_restartParam()
     ws_stopParam;
     if [ "$_return" == true ]
     then
+        _print "Clearing api cache!" "blue" "white";
+        clear_api_cacheParam;
         _print "Doing restart proccess!" "blue" "white";
         ws_startParam;
     else
