@@ -2,7 +2,7 @@
 
 _return=false;
 #Define command-level options
-_args=("--start" "--stop" "--restart" "--deploy" "--ws_start" "--ws_stop" "--ws_restart" "--libs_update" "--clear_api_cache");
+_args=("--start" "--stop" "--restart" "--deploy" "--ws_start" "--ws_stop" "--ws_restart" "--libs_update" "--clear_api_cache" "--reset_api");
 _ng_port=50001;
 _ws_port=50002;
 
@@ -11,6 +11,15 @@ clear_api_cacheParam() {
     php bin/console cache:clear;
     chmod -R 777 /var/www/html/discoexample.dev.scmnight.com/rest;
 }
+
+reset_apiParam() {
+    _print "Resetting dev environment for api..." "blue" "white";
+    cd /var/www/html/discoexample.dev.scmnight.com/rest;
+    composer dev-install;
+    chmod -R 777 /var/www/html/discoexample.dev.scmnight.com/rest;
+    _print "Proccess finished! Check details above." "blue" "white";
+}
+
 #Start it
 startParam()
 {
@@ -180,6 +189,5 @@ deployParam() {
     ng build --delete-output-path=false --build-optimizer --progress --verbose --aot --prod --env=prod --target=production --environment=prod --output-path="/var/www/html/disco.scmnight.com/";
     _print "Proccess finished! Check details above." "blue" "white";
 }
-
 # GET SOURCES
 source scm-core
