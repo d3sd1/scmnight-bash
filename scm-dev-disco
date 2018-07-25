@@ -227,6 +227,7 @@ deployParam() {
     php bin/console cache:warmup;
     chmod 777 -R "/var/www/html/discoexample.dev.scmnight.com/rest/var";
     rm -rf /var/www/html/discoexample.dev.scmnight.com/rest/var;
+    rm /var/www/html/discoexample.dev.scmnight.com/rest/composer.lock;
     rm -r /var/www/html/discoexample.dev.scmnight.com/rest/vendor/*;
     cp /var/www/deploy/DISCO/VERSION /var/www/html/discoexample.dev.scmnight.com/rest/VERSION;
     cd /var/www/html/discoexample.dev.scmnight.com/rest/;
