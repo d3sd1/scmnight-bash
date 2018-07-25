@@ -25,7 +25,7 @@ startParam()
 {
     usedPort=$_ng_port;
     # NG SECTION. Configurable options
-    _command="ng serve --configuration=dev --aot --host web.discoexample.dev.scmnight.com --port $usedPort";
+    _command="ng serve --configuration=development --aot --host web.discoexample.dev.scmnight.com --port $usedPort";
     _needsCommandUp=false;
     _canExecute() {
         _print "Starting server...";
@@ -182,11 +182,64 @@ libs_updateParam() {
 
 #Deploy it
 deployParam() {
+
+{ # try
+
+    stopParam;
+    ws_stopParam;
+    #save your output
+
+} || {
+    _print "Server could not be stopped, keeping execution!" "blue" "white";
+}
+    stopParam;
+    cd /var/www/deploy/DISCO;
+    if [ ! -f VERSION ]; then
+    echo "1" > VERSION;
+    echo "true" > DEPLOYING;
+    else
+    PREV_VERSION=`cat VERSION`;
+    echo $(($PREV_VERSION + 1)) > VERSION;
+    fi
+    VERSION=`cat VERSION`;
+    _print "DEPLOYING VERSION $VERSION" "blue" "white";
     _print "Start packing and doing stuff..." "blue" "white";
+
+    # Deploy web to panel.scmnight.com
     mkdir -p "/var/www/html/disco.scmnight.com";
     cd "/var/www/html/discoexample.dev.scmnight.com/web";
     rm -r /var/www/html/disco.scmnight.com/* 2> /dev/null;
-    ng build --delete-output-path=false --build-optimizer --progress --verbose --aot --prod --env=prod --target=production --environment=prod --output-path="/var/www/html/disco.scmnight.com/";
+    ng build scm-disco --delete-output-path=false --build-optimizer --progress --verbose --aot --output-path="/var/www/html/disco.scmnight.com/" --prod;
+
+    # Deploy assets for email stuff
+    mkdir -p "/var/www/html/www.scmnight.com/public/assets";
+    cp -R "/var/www/html/discoexample.dev.scmnight.com/web/src/assets" "/var/www/html/www.scmnight.com/public";
+
+    # Deploy ZIP of WEB
+    rm /var/www/deploy/DISCO/web.zip
+    cp /var/www/deploy/DISCO/VERSION /var/www/html/disco.scmnight.com/VERSION;
+    cd /var/www/html/disco.scmnight.com/;
+    zip -r -D /var/www/deploy/DISCO/web.zip .;
+
+    # Deploy ZIP of API minified
+    rm /var/www/deploy/DISCO/rest.zip
+    cd "/var/www/html/discoexample.dev.scmnight.com/rest";
+    php bin/console cache:warmup;
+    chmod 777 -R "/var/www/html/discoexample.dev.scmnight.com/rest/var";
+    rm -rf /var/www/html/discoexample.dev.scmnight.com/rest/var;
+    rm -r /var/www/html/discoexample.dev.scmnight.com/rest/vendor/*;
+    cp /var/www/deploy/DISCO/VERSION /var/www/html/discoexample.dev.scmnight.com/rest/VERSION;
+    cd /var/www/html/discoexample.dev.scmnight.com/rest/;
+    zip -r -D /var/www/deploy/DISCO/rest.zip .;
+
+
+   # Finish deploy
+    cd "/var/www/html/discoexample.dev.scmnight.com/rest";
+    scm-dev-disco --reset_api;
+
+
+    echo "false" > DEPLOYING;
+    startParam;
     _print "Proccess finished! Check details above." "blue" "white";
 }
 # GET SOURCES
